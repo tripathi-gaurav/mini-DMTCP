@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -31,10 +32,10 @@ int my_func(){
 	char filePath[] =  "/proc/";
 
 	my_strconcat(filePath,"self/maps");
-	//get context first and then serialize 
+	//get context first and then serialize
 	ucontext_t ucp_ref;
 	getcontext(&ucp_ref);
-	
+
 	int fdOfInputFile = open(filePath, O_RDONLY);
 	int fdOfOutputFile = open("./memoryMap_miniDMTCP.bin", O_CREAT | O_WRONLY | O_APPEND, 0666);
 
@@ -44,11 +45,10 @@ int my_func(){
 
 	write(fdOfOutputFile, &ucp_ref, sizeof(ucp_ref));
 	//initialize the struct
-	struct MemoryRegion* memoryRegion; 
+	struct MemoryRegion* memoryRegion;
 
 	//read the file line by line and parse
 	char* lineToParse = getLine(fdOfInputFile);
-	
 	while(  lineToParse[0] != '\0' ){
 		//parse the line
 		printf("%s", lineToParse);
@@ -63,9 +63,12 @@ int my_func(){
 				unsigned long int length = memoryRegion->endAddr - memoryRegion->startAddr;
 				printf("Length = %lu\n", length);
 				printf("writing for: %s", memoryRegion->location);
+				printf("readable: %d\n", memoryRegion->isReadable);
 				printf("%p-%p\n", memoryRegion->endAddr, memoryRegion->startAddr);
-				write(fdOfOutputFile, &memoryRegion, sizeof(struct MemoryRegion));
-				write(fdOfOutputFile, memoryRegion->startAddr, memoryRegion->endAddr - memoryRegion->startAddr);
+				ssize_t ret = write(fdOfOutputFile, memoryRegion, sizeof(struct MemoryRegion));
+				assert( ret == sizeof(struct MemoryRegion));
+				ret = write(fdOfOutputFile, memoryRegion->startAddr, memoryRegion->endAddr - memoryRegion->startAddr);
+				assert( ret == (memoryRegion->endAddr - memoryRegion->startAddr));
 			}
 		}
 		lineToParse = getLine(fdOfInputFile);
@@ -73,10 +76,7 @@ int my_func(){
 
 
 	close(fdOfOutputFile);
-	close(fdOfInputFile);	
+	close(fdOfInputFile);
 
 	return 0;
 }
-
-
-

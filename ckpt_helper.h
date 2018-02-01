@@ -12,7 +12,7 @@ char* my_strconcat(char c1[], char c2[]);
 char* getLine(int fd);
 struct MemoryRegion* parseLineToMemoryRegion(char* lineToParse);
 void* getAddressFromLine(char* lineToParse, int charactersRead, char delimeter);
-int convertHexToLongLongInt(long long int *memoryAddressInLongLongInt, char* memoryAddressString);
+int convertHexToLongLongInt(unsigned long long int *memoryAddressInLongLongInt, char* memoryAddressString);
 void parseAndSetPermissions(char *lineToParse, int readFrom, struct MemoryRegion* memoryRegion);
 
 
@@ -64,7 +64,7 @@ struct MemoryRegion* parseLineToMemoryRegion(char *lineToParse){
 	}
 
 	while(lineToParse[charactersRead++] != '-');
-	charactersRead += 1;
+	//charactersRead += 1;
 
 	if( (address = getAddressFromLine(lineToParse, charactersRead, ' ')) != NULL ){
 		memoryRegion->endAddr = address;
@@ -106,7 +106,7 @@ struct MemoryRegion* parseLineToMemoryRegion(char *lineToParse){
 void* getAddressFromLine(char *lineToParse, int charactersRead, char delimeter){
 	void *address = NULL;
 	char memoryAddressString[110];
-	long long int memoryAddress;
+	unsigned long long int memoryAddress;
 	int i, converted;
 
 
@@ -130,11 +130,11 @@ void* getAddressFromLine(char *lineToParse, int charactersRead, char delimeter){
 		return NULL;
 	}
 	address = (void*) memoryAddress;
-	printf("address = %lld\n", (long long int) address);
+	printf("address = %llu\n", (unsigned long long int) address);
 	return address;
 }
 
-int convertHexToLongLongInt(long long int* memoryAddressInLongLongInt, char* memoryAddressString){
+int convertHexToLongLongInt(unsigned long long int* memoryAddressInLongLongInt, char* memoryAddressString){
 
 	int hexCharToIntTable[] = {
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
@@ -153,7 +153,7 @@ int convertHexToLongLongInt(long long int* memoryAddressInLongLongInt, char* mem
 	int success = -1;
 	int longLongIntArray[100];
 	int i,j;
-	long long int currentValue, calculatedValue, placeValue = 1;
+	unsigned long long int currentValue, calculatedValue, placeValue = 1;
 
 	calculatedValue = 0;
 
