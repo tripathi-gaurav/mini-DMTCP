@@ -11,7 +11,7 @@
 
 
 int my_func();
-
+int flagToCheck = 0;
 
 //signal handler
 void my_sig_handler(int sig);
@@ -22,7 +22,7 @@ __attribute__((constructor)) void sig_handler_constructor(){
 
 void my_sig_handler(int sig){
 	signal(sig, SIG_DFL);
-	printf("caught this");
+	printf("\ncaught this\n");
 	my_func();
 	return;
 }
@@ -38,9 +38,12 @@ int my_func(){
 
 	int fdOfInputFile = open(filePath, O_RDONLY);
 	int fdOfOutputFile = open("./memoryMap_miniDMTCP.bin", O_CREAT | O_WRONLY | O_APPEND, 0666);
-
+	if(flagToCheck != 0){
+		return flagToCheck;
+	}
+	flagToCheck = 1;
 	if(fdOfInputFile < 0 || fdOfOutputFile <0){
-		exit(1);
+		printf("Error accessing one of the IO files!");
 	}
 
 	write(fdOfOutputFile, &ucp_ref, sizeof(ucp_ref));
@@ -51,7 +54,7 @@ int my_func(){
 	char* lineToParse = getLine(fdOfInputFile);
 	while(  lineToParse[0] != '\0' ){
 		//parse the line
-		printf("%s", lineToParse);
+		//printf("%s", lineToParse);
 		memoryRegion = parseLineToMemoryRegion(lineToParse);
 
 		//store into ckpt file
@@ -60,11 +63,11 @@ int my_func(){
 			//char* location = memoryRegion->location;
 		//	printf("location = %s\n", location);
 			if(strstr(lineToParse, "vvar") == NULL && strstr(lineToParse, "vdso") == NULL && strstr(lineToParse, "vsyscall") == NULL ){
-				unsigned long int length = memoryRegion->endAddr - memoryRegion->startAddr;
-				printf("Length = %lu\n", length);
-				printf("writing for: %s", memoryRegion->location);
-				printf("readable: %d\n", memoryRegion->isReadable);
-				printf("%p-%p\n", memoryRegion->endAddr, memoryRegion->startAddr);
+				//unsigned long int length = memoryRegion->endAddr - memoryRegion->startAddr;
+				//printf("Length = %lu\n", length);
+				//printf("writing for: %s", memoryRegion->location);
+				//printf("readable: %d\n", memoryRegion->isReadable);
+				//printf("%p-%p\n", memoryRegion->endAddr, memoryRegion->startAddr);
 				ssize_t ret = write(fdOfOutputFile, memoryRegion, sizeof(struct MemoryRegion));
 				assert( ret == sizeof(struct MemoryRegion));
 				ret = write(fdOfOutputFile, memoryRegion->startAddr, memoryRegion->endAddr - memoryRegion->startAddr);

@@ -29,7 +29,7 @@ char* getLine(int fileDescriptor){
 			break;
 		}else{
 			lineToReturn[i++] = value;
-		}		
+		}
 		if(bytesRead == 0 || value=='\n' || value=='\0'){
 			lineToReturn[i] = '\n';
 			if( value == -1){
@@ -74,7 +74,7 @@ struct MemoryRegion* parseLineToMemoryRegion(char *lineToParse){
 	//charactersRead += 1;
 
 	parseAndSetPermissions(lineToParse, charactersRead, memoryRegion);
-	
+
 	while(lineToParse[charactersRead++] != ' ');
 	charactersRead += 1;
 
@@ -82,21 +82,21 @@ struct MemoryRegion* parseLineToMemoryRegion(char *lineToParse){
 	char temp[150];
 	//printf("chars read=%d\n", charactersRead);
 	//TODO: same reason as mentioned in previous todo. :(
-	printf("!!note this!!\n");
+	//printf("!!note this!!\n");
 	while(lineToParse[charactersRead] >0 ){
 		//printf("char is: %c and charactersRead=%d \n", lineToParse[charactersRead], charactersRead);
 		//printf("%c", lineToParse[charactersRead]);
 		temp[i++] = lineToParse[charactersRead++];
 	}
 	temp[i] = '\0';
-	printf("\n");
+	//printf("\n");
 
 	//printf("location should be=%s\n", temp);
 	//memoryRegion->location = malloc(sizeof(char)*150);
 	strcpy(memoryRegion->location,temp);
 	//memoryRegion->location[] = temp;
 	//printf("but location now =%s\n", memoryRegion->location);
-	
+
 	return memoryRegion;
 
 }
@@ -111,7 +111,7 @@ void* getAddressFromLine(char *lineToParse, int charactersRead, char delimeter){
 
 
 	//printf("charactersRead++=%d", ++*charactersRead);
-	
+
 	if(lineToParse[charactersRead] == '\n'){
 		return address;
 	}
@@ -122,7 +122,7 @@ void* getAddressFromLine(char *lineToParse, int charactersRead, char delimeter){
 	}
 	//printf("*charactersRead=%d", charactersRead);
 	memoryAddressString[i] = '\0';
-	printf("Memory address: %s\n", memoryAddressString);
+	//printf("Memory address: %s\n", memoryAddressString);
 
 	converted = convertHexToLongLongInt(&memoryAddress, memoryAddressString);
 	if(converted < 0){
@@ -130,7 +130,7 @@ void* getAddressFromLine(char *lineToParse, int charactersRead, char delimeter){
 		return NULL;
 	}
 	address = (void*) memoryAddress;
-	printf("address = %llu\n", (unsigned long long int) address);
+	//printf("address = %llu\n", (unsigned long long int) address);
 	return address;
 }
 

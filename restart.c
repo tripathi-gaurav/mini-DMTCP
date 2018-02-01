@@ -70,7 +70,10 @@ void restoreCheckpoint(){
 		printf("Failed to close chkpt file. -.-");
 		exit(-1);
 	}
-	setcontext(&ucp_ref);
+	int final_res = setcontext(&ucp_ref);
+	if( final_res < 0){
+			printf("Error setting checkpoint. %s", strerror(errno));
+	}
 
 }
 
@@ -82,24 +85,14 @@ int restoreMemoryFromImage(int fd){
 
 		res = read(fd, &memoryRegion, sizeof(struct MemoryRegion));
 		unsigned long long int length = memoryRegion.endAddr - memoryRegion.startAddr;
-		printf("==new==\nlen=%llu\n", length);
-		printf("startAddr: %llu\n", (unsigned long long int) memoryRegion.startAddr);
-		printf("endAddr: %llu\n", (unsigned long long int) memoryRegion.endAddr);
-		printf("read perm: %d\n", memoryRegion.isReadable);
+		//printf("==stack restoration==\nlen=%llu\n", length);
+		//printf("startAddr: %llu\n", (unsigned long long int) memoryRegion.startAddr);
+		//printf("endAddr: %llu\n", (unsigned long long int) memoryRegion.endAddr);
+		//printf("read perm: %d\n", memoryRegion.isReadable);
 
 		//OK till here
 		char *p = mmap(memoryRegion.startAddr, length, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_FIXED | MAP_PRIVATE, -1, 0);
-		/*
-		char *p;
-		if(strstr(memoryRegion.location, "stack") == NULL){
-			printf("mapping others");
-			p = mmap(memoryRegion.startAddr, length, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_FIXED | MAP_PRIVATE, -1, 0);
-		}else{
-			printf("mapping the stack");
-			p = mmap(memoryRegion.startAddr, length, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_FIXED | MAP_PRIVATE | MAP_GROWSDOWN , -1, 0);
-		}
-		*/
-		printf("%p-%p\t%p\t%s\n",memoryRegion.startAddr,memoryRegion.endAddr,p,memoryRegion.location);
+		//printf("%p-%p\t%p\t%s\n",memoryRegion.startAddr,memoryRegion.endAddr,p,memoryRegion.location);
 		fflush(stdout);
 		if(res <0){
 			printf("Error mapping chkpt memory.\n");
@@ -110,7 +103,7 @@ int restoreMemoryFromImage(int fd){
 
 
 		res = read(fd, memoryRegion.startAddr, length);
-		printf("aaya.");
+
 		if(res < 0){
 			printf("Error _reading_ chkpt memory.");
 			printf("%s\n", strerror(errno));
@@ -158,11 +151,11 @@ void unmapCurrentStack(){
 	close(fdForRestartProg); //maybe for safety, could do if(close(fd)<0){exit(-1);}
 	length = (unsigned long long int) mr->endAddr - (unsigned long long int) mr->startAddr;
 
-	printf("start addr: %llu\nend addr: %llu\nlength: %llu\n", mr->startAddr, mr->endAddr,length);
+	//printf("start addr: %llu\nend addr: %llu\nlength: %llu\n", mr->startAddr, mr->endAddr,length);
 	//exit(0);
 	int res = munmap(mr->startAddr, length);
 
-	printf("unmap old stack: %d", res);
+	//printf("unmap old stack: %d", res);
 
 }
 
@@ -173,7 +166,7 @@ struct MemoryRegion* getMemoryRegionOfRestartStack(int fd){
 	struct MemoryRegion* mr;
 	char* lineToParse = getLine(fd);
 	while( lineToParse[0] != '\0'){
-		printf("%s", lineToParse);
+		//printf("%s", lineToParse);
 		mr = parseLineToMemoryRegion(lineToParse);
 
 		if(strstr(lineToParse, "[stack]") != NULL){

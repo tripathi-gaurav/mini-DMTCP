@@ -4,9 +4,9 @@
 
 
 int main(int argc, char *argv[]){
-	while(1){
-		printf(".");
+	for(int i = 0; ; i++) {
+		printf("%d ", i);
 		fflush(stdout);
-		sleep(1);		
+		sleep(1);
 	}
 }
